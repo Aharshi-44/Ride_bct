@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Rider dashboard · Velora{% endblock %}
+{% block content %}
+<div class="space-y-8">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">Hello, {{ user.first_name|default:user.username }}</h1>
+      <p class="mt-1 text-slate-600 dark:text-slate-400">Your trips and spending at a glance.</p>
+    </div>
+    <a href="{% url 'rides:book' %}" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110">Book a new ride</a>
+  </header>
+
+  <div class="grid gap-6 sm:grid-cols-2">
+    <div class="glass rounded-2xl p-6">
+      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total spent (completed)</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">₹{{ total_spent }}</p>
+    </div>
+    <div class="glass rounded-2xl p-6">
+      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Completed rides</p>
+      <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ completed_count }}</p>
+    </div>
+  </div>
+
+  <div class="glass rounded-[2rem] p-6 sm:p-8">
+    <h2 class="text-lg font-semibold">Recent rides</h2>
+    {% if rides %}
+      <ul class="mt-4 divide-y divide-white/10 dark:divide-slate-700/50">
+        {% for r in rides %}
+          <li class="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0">
+            <div>
+              <p class="font-medium text-slate-900 dark:text-white">{{ r.pickup_location }} → {{ r.drop_location }}</p>
+              <p class="text-xs text-slate-500">{{ r.created_at|date:"M j, Y H:i" }} · {{ r.get_status_display }}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-semibold text-violet-700 dark:text-violet-300">₹{{ r.fare }}</span>
+              <a href="{% url 'rides:ride_status' r.pk %}" class="rounded-xl bg-white/30 px-3 py-1.5 text-xs font-semibold text-slate-800 transition hover:bg-white/50 dark:bg-slate-800/60 dark:text-white dark:hover:bg-slate-700">Track</a>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="mt-4 text-slate-600 dark:text-slate-400">No rides yet. Book your first trip!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

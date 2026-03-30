@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Login · Velora{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md">
+  <div class="glass rounded-[2rem] p-8 shadow-glass sm:p-10">
+    <h1 class="text-2xl font-bold tracking-tight">Welcome back</h1>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Sign in to book rides or manage your driver profile.</p>
+    <form method="post" class="mt-8 space-y-5" action="{% url 'accounts:login' %}">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="rounded-xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-800 dark:text-rose-200">
+          {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ field.label }}</label>
+          {{ field.errors }}
+          {{ field }}
+        </div>
+      {% endfor %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110">
+        <span class="relative z-10">Continue</span>
+      </button>
+    </form>
+    <p class="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      New here?
+      <a href="{% url 'accounts:register_user' %}" class="font-semibold text-violet-600 hover:underline dark:text-violet-400">Create rider account</a>
+      or
+      <a href="{% url 'accounts:register_driver' %}" class="font-semibold text-blue-600 hover:underline dark:text-blue-400">join as driver</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Register · Rider{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-lg">
+  <div class="glass rounded-[2rem] p-8 shadow-glass sm:p-10">
+    <h1 class="text-2xl font-bold tracking-tight">Create rider account</h1>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Book rides with live tracking and clear pricing.</p>
+    <form method="post" class="mt-8 space-y-4">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ field.label }}</label>
+          {{ field.errors }}
+          {{ field }}
+          {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="mt-4 w-full rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110">Create account</button>
+    </form>
+    <p class="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      Want to drive?
+      <a href="{% url 'accounts:register_driver' %}" class="font-semibold text-violet-600 hover:underline dark:text-violet-400">Driver registration</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
