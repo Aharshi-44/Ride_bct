@@ -1,112 +1,67 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="h-full scroll-smooth">
+<html lang="en" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Velora Rides{% endblock %}</title>
+  <title>{% block title %}Velora{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Outfit', 'system-ui', 'sans-serif'] },
-          colors: {
-            brand: {
-              50: '#f5f3ff',
-              100: '#ede9fe',
-              400: '#a78bfa',
-              500: '#8b5cf6',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              900: '#4c1d95',
-            },
-          },
-          boxShadow: {
-            glass: '0 8px 32px rgba(31, 38, 135, 0.15)',
-          },
-        },
-      },
-    }
-  </script>
-  <style>
-    .glass {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-    .dark .glass {
-      background: rgba(15, 23, 42, 0.55);
-      border-color: rgba(148, 163, 184, 0.2);
-    }
-    .mesh-bg {
-      background-color: #0f172a;
-      background-image:
-        radial-gradient(at 20% 20%, rgba(139, 92, 246, 0.35) 0px, transparent 50%),
-        radial-gradient(at 80% 0%, rgba(59, 130, 246, 0.3) 0px, transparent 45%),
-        radial-gradient(at 50% 80%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
-    }
-    .mesh-bg-light {
-      background-color: #f8fafc;
-      background-image:
-        radial-gradient(at 10% 10%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-        radial-gradient(at 90% 10%, rgba(59, 130, 246, 0.12) 0px, transparent 45%),
-        radial-gradient(at 50% 90%, rgba(236, 72, 153, 0.08) 0px, transparent 50%);
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-full font-sans text-slate-800 dark:text-slate-100 mesh-bg-light dark:mesh-bg transition-colors duration-300">
-  <div id="toast-root" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+<body class="mesh-bg">
+  <div class="shell">
+    <div id="toast-root" aria-live="polite"></div>
 
-  <nav class="sticky top-0 z-50 border-b border-white/20 dark:border-slate-700/50 glass">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-      <a href="{% url 'home' %}" class="group flex items-center gap-2">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-violet-500/30 transition group-hover:scale-105">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        </span>
-        <span class="text-lg font-semibold tracking-tight">Velora</span>
-      </a>
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button type="button" id="theme-toggle" class="rounded-xl p-2 text-slate-600 transition hover:bg-white/30 dark:text-slate-300 dark:hover:bg-slate-800/60" aria-label="Toggle dark mode">
-          <svg id="icon-sun" class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <svg id="icon-moon" class="h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-        </button>
-        {% if user.is_authenticated %}
-          <a href="{% url 'accounts:dashboard' %}" class="hidden rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white/40 dark:text-slate-200 dark:hover:bg-slate-800/60 sm:inline">Dashboard</a>
-          {% if not user.is_driver %}
-            <a href="{% url 'rides:book' %}" class="rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110">Book Ride</a>
+    <header class="site-nav">
+      <div class="container site-nav__inner">
+        <a class="brand" href="{% url 'home' %}">
+          <span class="brand__mark" aria-hidden="true">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </span>
+          Velora
+        </a>
+        <div class="nav-actions">
+          <button type="button" class="btn btn--ghost btn--sm" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">Theme</button>
+          {% if user.is_authenticated %}
+            <a class="btn btn--ghost btn--sm" href="{% url 'accounts:dashboard' %}">Dashboard</a>
+            {% if not user.is_driver %}
+              <a class="btn btn--primary btn--sm" href="{% url 'rides:book' %}">Book ride</a>
+            {% endif %}
+            <form action="{% url 'accounts:logout' %}" method="post" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn--ghost btn--sm">Logout</button>
+            </form>
+          {% else %}
+            <a class="btn btn--ghost btn--sm" href="{% url 'accounts:login' %}">Login</a>
+            <a class="btn btn--primary btn--sm" href="{% url 'accounts:register_user' %}">Sign up</a>
           {% endif %}
-          <form action="{% url 'accounts:logout' %}" method="post" class="inline">
-            {% csrf_token %}
-            <button type="submit" class="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white/40 dark:text-slate-300 dark:hover:bg-slate-800/60">Logout</button>
-          </form>
-        {% else %}
-          <a href="{% url 'accounts:login' %}" class="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white/40 dark:text-slate-200 dark:hover:bg-slate-800/60">Login</a>
-          <a href="{% url 'accounts:register_user' %}" class="rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110">Sign up</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        {% if messages %}
+          <div class="mb-2">
+            {% for message in messages %}
+              <div
+                class="alert {% if message.tags == 'error' %}alert--error{% elif message.tags == 'success' %}alert--success{% endif %}"
+                data-toast
+              >{{ message }}</div>
+            {% endfor %}
+          </div>
         {% endif %}
+        {% block content %}{% endblock %}
       </div>
-    </div>
-  </nav>
+    </main>
 
-  <main class="mx-auto max-w-6xl px-4 py-8 sm:py-12">
-    {% if messages %}
-      <div class="mb-6 space-y-2">
-        {% for message in messages %}
-          <div class="glass rounded-2xl px-4 py-3 text-sm transition-opacity duration-300 {% if message.tags == 'error' %}border-rose-400/40 text-rose-800 dark:text-rose-200{% elif message.tags == 'success' %}border-emerald-400/40 text-emerald-800 dark:text-emerald-200{% else %}border-slate-400/30{% endif %}" data-toast>{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    {% block content %}{% endblock %}
-  </main>
-
-  <footer class="mt-auto border-t border-white/10 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-    <p>Velora — demo ride booking experience · Built with Django & Tailwind</p>
-  </footer>
+    <footer class="site-footer">
+      <p class="mb-0">Velora — ride booking demo · Django</p>
+    </footer>
+  </div>
 
   <script src="{% static 'js/app.js' %}"></script>
   {% block extra_js %}{% endblock %}

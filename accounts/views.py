@@ -59,6 +59,18 @@ def dashboard(request):
         completed = Ride.objects.filter(driver=user, status=Ride.Status.COMPLETED)
         earnings = completed.aggregate(total=Sum("fare"))["total"] or 0
         recent = Ride.objects.filter(driver=user).order_by("-created_at")[:10]
+        from rides.models import RideRejection
+        from rides.services import simulated_pickup_distance_km
+
+        rejected_ids = RideRejection.objects.filter(driver=user).values_list("ride_id", flat=True)
+        incoming = (
+            Ride.objects.filter(status=Ride.Status.PENDING, driver__isnull=True)
+            .exclude(id__in=rejected_ids)
+            .order_by("-created_at")[:10]
+        )
+        driver_area = (profile.current_area if profile else "") or ""
+        for r in incoming:
+            r.pickup_distance_km = simulated_pickup_distance_km(driver_area, r.pickup_location) if driver_area else None
         return render(
             request,
             "dashboard_driver.html",
@@ -67,6 +79,7 @@ def dashboard(request):
                 "earnings": earnings,
                 "completed_count": completed.count(),
                 "recent_rides": recent,
+                "incoming_rides": incoming,
             },
         )
 

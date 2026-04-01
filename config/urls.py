@@ -10,6 +10,7 @@ urlpatterns = [
     path("", home, name="home"),
     path("accounts/", include("accounts.urls")),
     path("rides/", include("rides.urls")),
+    path("api/location/", include("locations.urls")),
 ]
 
 if settings.DEBUG:

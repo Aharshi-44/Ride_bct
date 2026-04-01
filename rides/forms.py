@@ -1,10 +1,6 @@
 from django import forms
 
-_CONTROL = (
-    "w-full rounded-xl border border-white/30 bg-white/50 px-4 py-3 "
-    "text-slate-900 outline-none transition focus:ring-2 focus:ring-violet-500/40 "
-    "dark:border-slate-600 dark:bg-slate-900/50 dark:text-white placeholder:text-slate-400"
-)
+_CONTROL = "form-control"
 
 
 class BookRideForm(forms.Form):
@@ -16,8 +12,37 @@ class BookRideForm(forms.Form):
         max_length=255,
         widget=forms.TextInput(attrs={"placeholder": "Drop-off address or landmark"}),
     )
+    pickup_lat = forms.CharField(required=False, widget=forms.HiddenInput())
+    pickup_lng = forms.CharField(required=False, widget=forms.HiddenInput())
+    drop_lat = forms.CharField(required=False, widget=forms.HiddenInput())
+    drop_lng = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs["class"] = _CONTROL
+
+        for name in ("pickup_lat", "pickup_lng", "drop_lat", "drop_lng"):
+            self.fields[name].widget.attrs.pop("class", None)
+
+    def clean(self):
+        cleaned = super().clean()
+        pickup_txt = (cleaned.get("pickup_location") or "").strip()
+        drop_txt = (cleaned.get("drop_location") or "").strip()
+        plat = (cleaned.get("pickup_lat") or "").strip()
+        plng = (cleaned.get("pickup_lng") or "").strip()
+        dlat = (cleaned.get("drop_lat") or "").strip()
+        dlng = (cleaned.get("drop_lng") or "").strip()
+
+        if pickup_txt and (not plat or not plng):
+            self.add_error("pickup_location", "Please select a pickup location from the suggestions.")
+        if drop_txt and (not dlat or not dlng):
+            self.add_error("drop_location", "Please select a drop-off location from the suggestions.")
+
+        cleaned["pickup_lat"] = plat
+        cleaned["pickup_lng"] = plng
+        cleaned["drop_lat"] = dlat
+        cleaned["drop_lng"] = dlng
+        cleaned["pickup_location"] = pickup_txt
+        cleaned["drop_location"] = drop_txt
+        return cleaned

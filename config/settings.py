@@ -2,13 +2,39 @@
 Django settings for Ride Booking project.
 """
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+def _load_dotenv_if_present():
+    """
+    Lightweight .env loader (no dependency).
+    Only sets variables that are not already set in the environment.
+    """
+    env_path = BASE_DIR / ".env"
+    if not env_path.exists():
+        return
+    try:
+        for raw in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and k not in os.environ:
+                os.environ[k] = v
+    except Exception:
+        # If .env is malformed, ignore and rely on real environment variables.
+        return
+
+
+_load_dotenv_if_present()
+
 SECRET_KEY = "django-insecure-@qd@=hh5@0$+i_i+&_uyk1x60zk&)=%kk#t=cx1@fuj8bo#$gn"
 
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -21,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "rides",
+    "locations",
 ]
 
 MIDDLEWARE = [
@@ -97,3 +124,11 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "home"
+
+# OSM self-hosted services
+# Example defaults if you run local containers:
+# - Nominatim: http://localhost:8080
+# - OSRM:      http://localhost:5000
+OSM_NOMINATIM_BASE_URL = os.environ.get("OSM_NOMINATIM_BASE_URL", "http://localhost:8080").rstrip("/")
+OSM_OSRM_BASE_URL = os.environ.get("OSM_OSRM_BASE_URL", "http://localhost:5000").rstrip("/")
+OSM_HTTP_USER_AGENT = os.environ.get("OSM_HTTP_USER_AGENT", "velora-rides/1.0")

@@ -1,0 +1,28 @@
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Django
+*.log
+media/
+staticfiles/
+
+# Local databases
+db.sqlite3
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# Local notes / secrets
+IMP.md

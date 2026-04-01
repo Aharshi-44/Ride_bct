@@ -3,11 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from .models import DriverProfile, User
 
-_CONTROL = (
-    "w-full rounded-xl border border-white/30 bg-white/50 px-4 py-3 "
-    "text-slate-900 outline-none transition focus:ring-2 focus:ring-violet-500/40 "
-    "dark:border-slate-600 dark:bg-slate-900/50 dark:text-white placeholder:text-slate-400"
-)
+_CONTROL = "form-control"
 
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -60,6 +56,7 @@ class DriverRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=150, required=True)
     last_name = forms.CharField(max_length=150, required=True)
     vehicle_number = forms.CharField(max_length=32, required=True)
+    current_area = forms.CharField(max_length=120, required=False)
 
     class Meta:
         model = User
@@ -71,6 +68,7 @@ class DriverRegistrationForm(UserCreationForm):
         self.fields["password1"].widget.attrs["placeholder"] = "Create a strong password"
         self.fields["password2"].widget.attrs["placeholder"] = "Confirm password"
         self.fields["vehicle_number"].widget.attrs["placeholder"] = "e.g. KA01AB1234"
+        self.fields["current_area"].widget.attrs["placeholder"] = "Your current area (optional)"
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -84,5 +82,6 @@ class DriverRegistrationForm(UserCreationForm):
                 user=user,
                 vehicle_number=self.cleaned_data["vehicle_number"].upper(),
                 is_available=True,
+                current_area=(self.cleaned_data.get("current_area") or "").strip(),
             )
         return user

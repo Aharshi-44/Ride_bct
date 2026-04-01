@@ -1,56 +1,97 @@
 {% extends "base.html" %}
 {% block title %}Driver dashboard · Velora{% endblock %}
 {% block content %}
-<div class="space-y-8">
-  <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+<div>
+  <header class="flex flex-wrap items-end justify-between gap-4 mb-2">
     <div>
-      <h1 class="text-3xl font-bold tracking-tight">Driver hub</h1>
-      <p class="mt-1 text-slate-600 dark:text-slate-400">Availability, earnings, and recent assignments.</p>
+      <h1 class="page-title">Driver hub</h1>
+      <p class="page-subtitle">Availability, earnings, and assignments.</p>
     </div>
     {% if profile %}
-      <form method="post" action="{% url 'rides:toggle_availability' %}" class="inline">
+      <form method="post" action="{% url 'rides:toggle_availability' %}">
         {% csrf_token %}
-        <button type="submit" class="rounded-2xl border px-6 py-3 text-sm font-semibold transition {% if profile.is_available %}border-emerald-400/50 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200{% else %}border-slate-400/40 bg-slate-500/10 text-slate-700 dark:text-slate-200{% endif %}">
-          {% if profile.is_available %}● Online — accepting rides{% else %}○ Offline{% endif %}
+        <button type="submit" class="btn {% if profile.is_available %}btn--success{% else %}btn--secondary{% endif %}">
+          {% if profile.is_available %}● Online{% else %}○ Offline{% endif %}
         </button>
       </form>
     {% endif %}
   </header>
 
-  <div class="grid gap-6 sm:grid-cols-3">
-    <div class="glass rounded-2xl p-6">
-      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total earnings</p>
-      <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">₹{{ earnings }}</p>
+  <div class="grid grid--3 mt-2">
+    <div class="card card--flat">
+      <p class="muted mb-1" style="font-weight:600;">Total earnings</p>
+      <p class="mb-0" style="font-size:1.75rem;font-weight:800;">₹{{ earnings }}</p>
     </div>
-    <div class="glass rounded-2xl p-6">
-      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Completed trips</p>
-      <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{{ completed_count }}</p>
+    <div class="card card--flat">
+      <p class="muted mb-1" style="font-weight:600;">Completed trips</p>
+      <p class="mb-0" style="font-size:1.75rem;font-weight:800;">{{ completed_count }}</p>
     </div>
-    <div class="glass rounded-2xl p-6">
-      <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Vehicle</p>
-      <p class="mt-2 text-xl font-bold text-slate-900 dark:text-white">{{ profile.vehicle_number|default:"—" }}</p>
+    <div class="card card--flat">
+      <p class="muted mb-1" style="font-weight:600;">Vehicle</p>
+      <p class="mb-0" style="font-size:1.25rem;font-weight:800;">{{ profile.vehicle_number|default:"—" }}</p>
     </div>
   </div>
 
-  <div class="glass rounded-[2rem] p-6 sm:p-8">
-    <h2 class="text-lg font-semibold">Recent assignments</h2>
-    {% if recent_rides %}
-      <ul class="mt-4 divide-y divide-white/10 dark:divide-slate-700/50">
-        {% for r in recent_rides %}
-          <li class="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0">
-            <div>
-              <p class="font-medium text-slate-900 dark:text-white">{{ r.pickup_location }} → {{ r.drop_location }}</p>
-              <p class="text-xs text-slate-500">Rider: {{ r.user.username }} · {{ r.get_status_display }}</p>
+  <div class="card mt-2">
+    <div class="flex flex-wrap items-end justify-between gap-2">
+      <div>
+        <h2 class="page-title" style="font-size:1.125rem;">Incoming requests</h2>
+        <p class="muted mb-0" style="font-size:0.875rem;">
+          {% if profile.current_area %}Your area: <strong>{{ profile.current_area }}</strong>{% else %}Add your current area at registration to see estimated pickup distance.{% endif %}
+        </p>
+      </div>
+      <a class="btn btn--ghost btn--sm" href="{% url 'accounts:dashboard' %}">Refresh</a>
+    </div>
+    {% if incoming_rides %}
+      <div class="list-divided mt-2">
+        {% for r in incoming_rides %}
+          <div>
+            <div class="list-row">
+              <div>
+                <p class="mb-0" style="font-weight:600;">{{ r.pickup_location }} → {{ r.drop_location }}</p>
+                <p class="muted mb-0" style="font-size:0.8125rem;">
+                  {{ r.distance_km }} km · ₹{{ r.fare }}
+                  {% if r.pickup_distance_km is not None %}· You → pickup: {{ r.pickup_distance_km }} km{% endif %}
+                </p>
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <form method="post" action="{% url 'rides:accept' r.pk %}">{% csrf_token %}<button type="submit" class="btn btn--success btn--sm">Accept</button></form>
+                <form method="post" action="{% url 'rides:reject' r.pk %}">{% csrf_token %}<button type="submit" class="btn btn--ghost btn--sm" style="border-color:rgba(220,38,38,0.35);color:var(--danger);">Reject</button></form>
+                <a class="btn btn--secondary btn--sm" href="{% url 'rides:ride_status' r.pk %}">Details</a>
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-sm font-semibold text-blue-700 dark:text-blue-300">₹{{ r.fare }}</span>
-              <a href="{% url 'rides:ride_status' r.pk %}" class="rounded-xl bg-white/30 px-3 py-1.5 text-xs font-semibold text-slate-800 transition hover:bg-white/50 dark:bg-slate-800/60 dark:text-white">Open</a>
-            </div>
-          </li>
+          </div>
         {% endfor %}
-      </ul>
+      </div>
     {% else %}
-      <p class="mt-4 text-slate-600 dark:text-slate-400">No assignments yet. Stay online to receive rides.</p>
+      <p class="muted mb-0 mt-2">No incoming requests right now.</p>
+    {% endif %}
+  </div>
+
+  <div class="card mt-2">
+    <h2 class="page-title" style="font-size:1.125rem;">Recent assignments</h2>
+    {% if recent_rides %}
+      <div class="list-divided mt-2">
+        {% for r in recent_rides %}
+          <div class="list-row">
+            <div>
+              <p class="mb-0" style="font-weight:600;">{{ r.pickup_location }} → {{ r.drop_location }}</p>
+              <p class="muted mb-0" style="font-size:0.8125rem;">{{ r.user.username }} · {{ r.get_status_display }}</p>
+            </div>
+            <div class="flex items-center gap-1 flex-wrap">
+              <span style="font-weight:700;">₹{{ r.fare }}</span>
+              <a class="btn btn--ghost btn--sm" href="{% url 'rides:ride_status' r.pk %}">Open</a>
+              {% if r.status == 'accepted' or r.status == 'ongoing' %}
+                <form method="post" action="{% url 'rides:cancel' r.pk %}" class="inline">{% csrf_token %}
+                  <button type="submit" class="btn btn--ghost btn--sm" style="border-color:rgba(220,38,38,0.35);color:var(--danger);">Cancel ride</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted mb-0 mt-2">No assignments yet.</p>
     {% endif %}
   </div>
 </div>

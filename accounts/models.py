@@ -17,6 +17,7 @@ class DriverProfile(models.Model):
     )
     vehicle_number = models.CharField(max_length=32)
     is_available = models.BooleanField(default=True)
+    current_area = models.CharField(max_length=120, blank=True, default="")
 
     class Meta:
         ordering = ["vehicle_number"]

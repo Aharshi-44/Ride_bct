@@ -1,23 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Payment · Velora{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-md text-center">
-  <div class="glass rounded-[2rem] p-10 shadow-glass">
-    <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg">
-      <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+<div class="max-w-md text-center">
+  <div class="card">
+    <div class="flex justify-center mb-2">
+      <div class="avatar" style="width:4rem;height:4rem;font-size:1.5rem;" aria-hidden="true">₹</div>
     </div>
-    <h1 class="text-2xl font-bold">Demo payment</h1>
-    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">No real charges — this simulates a successful checkout.</p>
-    <div class="mt-8 rounded-2xl bg-white/30 p-6 text-left dark:bg-slate-900/40">
-      <p class="text-xs uppercase tracking-wide text-slate-500">Amount due</p>
-      <p class="text-3xl font-bold text-slate-900 dark:text-white">₹{{ ride.fare }}</p>
-      <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">{{ ride.pickup_location }} → {{ ride.drop_location }}</p>
+    <h1 class="page-title">Demo payment</h1>
+    <p class="page-subtitle">No real charges — confirms your ride request.</p>
+    <div class="card card--flat mt-2 text-left">
+      <p class="muted mb-1" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;">Amount due</p>
+      <p class="mb-2" style="font-size:2rem;font-weight:800;">₹{{ ride.fare }}</p>
+      <p class="muted mb-0">{{ ride.pickup_location }} → {{ ride.drop_location }}</p>
     </div>
-    <form method="post" class="mt-8">
+    <form method="post" class="mt-2">
       {% csrf_token %}
-      <button type="submit" class="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 py-4 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:brightness-110">
-        Pay ₹{{ ride.fare }} (simulated)
-      </button>
+      <button type="submit" class="btn btn--success btn--block btn--lg">Pay ₹{{ ride.fare }} (simulated)</button>
     </form>
   </div>
 </div>

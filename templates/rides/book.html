@@ -1,50 +1,254 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Book a ride · Velora{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-xl">
-  <div class="glass rounded-[2rem] p-8 shadow-glass sm:p-10">
-    <h1 class="text-2xl font-bold tracking-tight">Where to?</h1>
-    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Enter pickup and drop-off. Preview your fare before you confirm.</p>
+<div class="max-w-xl">
+  <div class="card">
+    <h1 class="page-title">Where to?</h1>
+    <p class="page-subtitle">Pick locations from suggestions, preview fare, then confirm.</p>
 
-    <form method="post" class="mt-8 space-y-5" id="book-form">
+    <form method="post" action="{% url 'rides:book' %}" class="mt-2" id="book-form">
       {% csrf_token %}
       {% for field in form %}
-        <div>
-          <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">{{ field.label }}</label>
+        <div class="form-group">
+          {% if field.field.widget.input_type != "hidden" %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% endif %}
           {{ field.errors }}
-          {{ field }}
+          {% if field.name == "pickup_location" %}
+            <div class="autocomplete-field">
+              {{ field }}
+              <div id="pickup-suggestions" class="suggestions" role="listbox" aria-label="Pickup suggestions"></div>
+            </div>
+          {% elif field.name == "drop_location" %}
+            <div class="autocomplete-field">
+              {{ field }}
+              <div id="drop-suggestions" class="suggestions" role="listbox" aria-label="Drop suggestions"></div>
+            </div>
+          {% else %}
+            {{ field }}
+          {% endif %}
         </div>
       {% endfor %}
 
       {% if preview_distance is not None and preview_fare is not None %}
-        <div class="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-4 text-sm dark:bg-emerald-900/20">
-          <p class="font-semibold text-emerald-800 dark:text-emerald-200">Estimated distance: {{ preview_distance }} km</p>
-          <p class="mt-1 text-emerald-700 dark:text-emerald-300">Fare preview: <span class="text-lg font-bold">₹{{ preview_fare }}</span> (₹50 base + ₹10/km)</p>
+        <div class="preview-box mt-2">
+          <p class="mb-1" style="font-weight:700;">Distance: {{ preview_distance }} km</p>
+          {% if preview_duration_min %}
+            <p class="muted mb-1">Est. time: {{ preview_duration_min }} min</p>
+          {% endif %}
+          <p class="mb-0">Fare preview: <strong>₹{{ preview_fare }}</strong> (₹{{ base_fare }} base + ₹{{ per_km_rate }}/km + ₹{{ per_min_rate }}/min)</p>
         </div>
       {% endif %}
 
-      <div class="flex flex-col gap-3 sm:flex-row">
-        <button type="submit" name="action" value="preview" id="btn-preview"
-          class="inline-flex flex-1 items-center justify-center rounded-xl border border-white/30 bg-white/20 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-white/40 dark:border-slate-600 dark:bg-slate-800/40 dark:text-white dark:hover:bg-slate-800/60">
+      <div class="flex flex-wrap gap-1 mt-2">
+        <button type="submit" name="book_action" value="preview" id="btn-preview" class="btn btn--secondary" style="flex:1;min-width:140px;">
           <span class="btn-label">Preview fare</span>
-          <svg class="loading-spinner ml-2 hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          <svg class="loading-spinner hidden spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
         </button>
-        <button type="submit" name="action" value="confirm" id="btn-confirm"
-          class="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:brightness-110">
+        <button type="submit" name="book_action" value="confirm" id="btn-confirm" class="btn btn--primary" style="flex:1;min-width:140px;">
           <span class="btn-label">Confirm booking</span>
-          <svg class="loading-spinner ml-2 hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          <svg class="loading-spinner hidden spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
         </button>
       </div>
     </form>
   </div>
 </div>
+
+<div id="wait-modal" class="modal-overlay hidden" aria-modal="true" role="dialog" aria-labelledby="wait-modal-title">
+  <div class="modal-card card">
+    <p id="wait-modal-title" class="muted mb-2" style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Request status</p>
+    <div id="wait-panel-loading" class="wait-panel">
+      <div class="wait-spinner" aria-hidden="true"></div>
+      <p class="mb-2" style="font-weight:600;">Waiting for a driver to accept your ride…</p>
+      <p class="muted mb-2" style="font-size:0.875rem;">We’ll notify you as soon as someone accepts.</p>
+      <button type="button" id="wait-btn-rider-cancel" class="btn btn--ghost btn--block" style="border-color:rgba(220,38,38,0.35);color:var(--danger);">Cancel request</button>
+    </div>
+    <div id="wait-panel-accepted" class="wait-panel hidden">
+      <div class="wait-check" aria-hidden="true">✓</div>
+      <p id="wait-accepted-msg" class="text-left"></p>
+      <p id="wait-vehicle-line" class="muted text-left mb-2" style="font-size:0.875rem;"></p>
+      <a href="#" id="wait-btn-payment" class="btn btn--success btn--block">Continue to payment</a>
+    </div>
+    <div id="wait-panel-cancelled" class="wait-panel hidden">
+      <p id="wait-cancelled-msg" class="mb-2" style="font-weight:600;"></p>
+      <button type="button" id="wait-btn-close" class="btn btn--secondary btn--block">Close</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block extra_js %}
+{% if wait_ride_id %}
+<script>window.__VELORA_WAIT_RIDE_ID__ = {{ wait_ride_id }};</script>
+{% endif %}
 <script>
-  document.getElementById('book-form').addEventListener('submit', function (e) {
+  document.getElementById("book-form").addEventListener("submit", function (e) {
     var sub = e.submitter;
-    if (!sub) return;
-    sub.querySelectorAll('.loading-spinner').forEach(function (el) { el.classList.remove('hidden'); });
+    if (!sub || sub.name !== "book_action") return;
+    if (sub.value === "preview") {
+      sub.querySelectorAll(".loading-spinner").forEach(function (el) { el.classList.remove("hidden"); });
+      return;
+    }
+    if (sub.value !== "confirm") return;
+    e.preventDefault();
+    var form = e.target;
+    sub.querySelectorAll(".loading-spinner").forEach(function (el) { el.classList.remove("hidden"); });
+    var fd = new FormData(form);
+    fd.set("book_action", sub.value);
+    fetch(form.getAttribute("action") || window.location.pathname, {
+      method: "POST",
+      body: fd,
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin",
+    })
+      .then(function (r) {
+        return r.json().then(function (data) {
+          return { ok: r.ok, data: data };
+        });
+      })
+      .then(function (res) {
+        sub.querySelectorAll(".loading-spinner").forEach(function (el) { el.classList.add("hidden"); });
+        if (res.ok && res.data && res.data.ok && res.data.ride_id && window.VeloraWaitModal) {
+          window.VeloraWaitModal.open(res.data.ride_id);
+          return;
+        }
+        if (res.data && res.data.error) {
+          alert(res.data.error === "validation" ? "Please select pickup and drop from suggestions and try again." : res.data.error);
+          return;
+        }
+        alert("Could not confirm booking. Please try again.");
+      })
+      .catch(function () {
+        sub.querySelectorAll(".loading-spinner").forEach(function (el) { el.classList.add("hidden"); });
+        alert("Could not reach the server. Check your connection and try again.");
+      });
   });
+</script>
+<script src="{% static 'js/book_wait_modal.js' %}"></script>
+<script>
+  (function () {
+    var pickupInput = document.getElementById("id_pickup_location");
+    var dropInput = document.getElementById("id_drop_location");
+    var pickupLat = document.getElementById("id_pickup_lat");
+    var pickupLng = document.getElementById("id_pickup_lng");
+    var dropLat = document.getElementById("id_drop_lat");
+    var dropLng = document.getElementById("id_drop_lng");
+    var pickupSuggestions = document.getElementById("pickup-suggestions");
+    var dropSuggestions = document.getElementById("drop-suggestions");
+
+    function clearPickupCoords() {
+      if (pickupLat) pickupLat.value = "";
+      if (pickupLng) pickupLng.value = "";
+    }
+
+    function clearDropCoords() {
+      if (dropLat) dropLat.value = "";
+      if (dropLng) dropLng.value = "";
+    }
+
+    function debounce(fn, wait) {
+      var t;
+      return function () {
+        var args = arguments;
+        clearTimeout(t);
+        t = setTimeout(function () { fn.apply(null, args); }, wait);
+      };
+    }
+
+    function hideBox(box) {
+      if (!box) return;
+      box.classList.remove("is-open");
+      box.innerHTML = "";
+    }
+
+    function showLoading(box) {
+      if (!box) return;
+      box.innerHTML = '<div class="suggestion-loading">Searching…</div>';
+      box.classList.add("is-open");
+    }
+
+    function renderSuggestions(box, items, onSelect, showEmptyHint) {
+      if (!box) return;
+      if (!items || !items.length) {
+        if (showEmptyHint) {
+          box.innerHTML = '<div class="suggestion-empty">No suggestions — try different words.</div>';
+          box.classList.add("is-open");
+        } else {
+          hideBox(box);
+        }
+        return;
+      }
+      box.innerHTML = "";
+      items.forEach(function (item) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "suggestion-item";
+        btn.textContent = item.display_name;
+        btn.addEventListener("mousedown", function (e) {
+          e.preventDefault();
+        });
+        btn.addEventListener("click", function () {
+          onSelect(item);
+          hideBox(box);
+        });
+        box.appendChild(btn);
+      });
+      box.classList.add("is-open");
+    }
+
+    function fetchSuggestions(query, callback) {
+      if (!query || query.length < 3) {
+        callback([], false);
+        return;
+      }
+      fetch("{% url 'locations:search' %}?q=" + encodeURIComponent(query), {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin",
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { callback((data && data.results) || [], true); })
+        .catch(function () { callback([], true); });
+    }
+
+    if (pickupInput && pickupLat && pickupLng && pickupSuggestions) {
+      pickupInput.addEventListener("input", debounce(function () {
+        clearPickupCoords();
+        var q = pickupInput.value;
+        if (q.length < 3) {
+          hideBox(pickupSuggestions);
+          return;
+        }
+        showLoading(pickupSuggestions);
+        fetchSuggestions(q, function (items, showEmpty) {
+          renderSuggestions(pickupSuggestions, items, function (item) {
+            pickupInput.value = item.display_name;
+            pickupLat.value = item.lat;
+            pickupLng.value = item.lon;
+          }, showEmpty);
+        });
+      }, 250));
+      pickupInput.addEventListener("blur", function () { setTimeout(function () { hideBox(pickupSuggestions); }, 200); });
+    }
+
+    if (dropInput && dropLat && dropLng && dropSuggestions) {
+      dropInput.addEventListener("input", debounce(function () {
+        clearDropCoords();
+        var q = dropInput.value;
+        if (q.length < 3) {
+          hideBox(dropSuggestions);
+          return;
+        }
+        showLoading(dropSuggestions);
+        fetchSuggestions(q, function (items, showEmpty) {
+          renderSuggestions(dropSuggestions, items, function (item) {
+            dropInput.value = item.display_name;
+            dropLat.value = item.lat;
+            dropLng.value = item.lon;
+          }, showEmpty);
+        });
+      }, 250));
+      dropInput.addEventListener("blur", function () { setTimeout(function () { hideBox(dropSuggestions); }, 200); });
+    }
+  })();
 </script>
 {% endblock %}
