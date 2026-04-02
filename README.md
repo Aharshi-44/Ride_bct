@@ -1,4 +1,4 @@
-<div align="center">
+<div align="Left">
 
 <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
   <img src="static/img/Final_logo.png" alt="Project logo" width="56" height="56" />
