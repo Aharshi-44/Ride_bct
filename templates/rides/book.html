@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Book a ride · Velora{% endblock %}
+{% block title %}Book a ride · Quick-Go{% endblock %}
 {% block content %}
 <div class="max-w-xl">
   <div class="card">
@@ -79,7 +79,7 @@
 {% endblock %}
 {% block extra_js %}
 {% if wait_ride_id %}
-<script>window.__VELORA_WAIT_RIDE_ID__ = {{ wait_ride_id }};</script>
+<script>window.__Quick-Go_WAIT_RIDE_ID__ = {{ wait_ride_id }};</script>
 {% endif %}
 <script>
   document.getElementById("book-form").addEventListener("submit", function (e) {
@@ -108,8 +108,8 @@
       })
       .then(function (res) {
         sub.querySelectorAll(".loading-spinner").forEach(function (el) { el.classList.add("hidden"); });
-        if (res.ok && res.data && res.data.ok && res.data.ride_id && window.VeloraWaitModal) {
-          window.VeloraWaitModal.open(res.data.ride_id);
+        if (res.ok && res.data && res.data.ok && res.data.ride_id && window["Quick-GoWaitModal"]) {
+          window["Quick-GoWaitModal"].open(res.data.ride_id);
           return;
         }
         if (res.data && res.data.error) {

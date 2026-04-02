@@ -138,7 +138,7 @@ def _http_json(endpoint: str, params: dict, user_agent: str) -> dict:
 
 
 def _nominatim_user_agent() -> str:
-    return (getattr(settings, "OSM_HTTP_USER_AGENT", "") or "velora-rides/1.0").strip()
+    return (getattr(settings, "OSM_HTTP_USER_AGENT", "") or "Quick-Go-rides/1.0").strip()
 
 
 def route_metrics(origin_lat: Decimal, origin_lng: Decimal, dest_lat: Decimal, dest_lng: Decimal) -> tuple[int, int]:

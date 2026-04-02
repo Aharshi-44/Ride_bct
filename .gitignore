@@ -3,8 +3,10 @@
 !.env.example
 
 # Python
-__pycache__/
-*.py[cod]
+**/__pycache__/
+*.pyc
+*.pyd
+*.pyo
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -26,3 +28,9 @@ db.sqlite3
 
 # Local notes / secrets
 IMP.md
+
+# Coverage / test tooling
+.coverage
+coverage.xml
+htmlcov/
+.tox/

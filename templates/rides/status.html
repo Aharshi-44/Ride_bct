@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Ride status · Velora{% endblock %}
+{% block title %}Ride status · Quick-Go{% endblock %}
 {% block content %}
 <div class="max-w-xl" data-ride-status-root data-viewer-is-rider="{% if request.user == ride.user %}1{% else %}0{% endif %}" data-initial-status="{{ ride.status }}" data-poll-url="{% url 'rides:ride_status_api' ride.pk %}">
   <div id="cancelled-notice" class="alert alert--error mb-2 {% if ride.status != 'cancelled' %}hidden{% endif %}" role="alert">

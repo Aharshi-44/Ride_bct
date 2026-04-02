@@ -3,8 +3,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import DriverProfile, User
 
-admin.site.site_header = "Velora Ride Admin"
-admin.site.site_title = "Velora Admin"
+admin.site.site_header = "Quick-Go Ride Admin"
+admin.site.site_title = "Quick-Go Admin"
 
 
 @admin.register(User)

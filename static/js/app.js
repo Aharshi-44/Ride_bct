@@ -1,6 +1,6 @@
 (function () {
   var root = document.documentElement;
-  var key = "velora-theme";
+  var key = "Quick-Go-theme";
 
   function apply(stored) {
     if (stored === "dark") root.classList.add("dark");

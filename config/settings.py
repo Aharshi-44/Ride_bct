@@ -131,4 +131,4 @@ LOGOUT_REDIRECT_URL = "home"
 # - OSRM:      http://localhost:5000
 OSM_NOMINATIM_BASE_URL = os.environ.get("OSM_NOMINATIM_BASE_URL", "http://localhost:8080").rstrip("/")
 OSM_OSRM_BASE_URL = os.environ.get("OSM_OSRM_BASE_URL", "http://localhost:5000").rstrip("/")
-OSM_HTTP_USER_AGENT = os.environ.get("OSM_HTTP_USER_AGENT", "velora-rides/1.0")
+OSM_HTTP_USER_AGENT = os.environ.get("OSM_HTTP_USER_AGENT", "Quick-Go-rides/1.0")

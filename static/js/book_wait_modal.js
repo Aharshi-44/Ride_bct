@@ -165,10 +165,11 @@
     btnClose.addEventListener("click", closeModal);
   }
 
-  window.VeloraWaitModal = { open: openModal, close: closeModal };
+  // Use bracket notation because the property name contains a hyphen.
+  window["Quick-GoWaitModal"] = { open: openModal, close: closeModal };
 
   document.addEventListener("DOMContentLoaded", function () {
-    var wid = window.__VELORA_WAIT_RIDE_ID__;
+    var wid = window.__Quick-Go_WAIT_RIDE_ID__;
     if (wid) {
       openModal(wid);
     }
