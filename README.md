@@ -1,6 +1,9 @@
 <div align="center">
 
-# Velora
+<div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+  <img src="static/img/Final_logo.png" alt="Project logo" width="56" height="56" />
+  <h1 style="margin:0;font-size:2rem;">Quick-Go</h1>
+</div>
 
 ### Smart ride booking for demos & coursework
 
@@ -14,7 +17,7 @@
 
 <br>
 
-[Why Velora](#why-velora) · [Features](#features) · [Quick start](#quick-start) · [Tech stack](#tech-stack) · [Architecture](#architecture) · [Configuration](#configuration) · [Fare](#fare-calculation) · [URLs](#http-routes) · [Layout](#project-layout) · [License](#license)
+[Why Quick-Go](#why-Quick-Go) · [Features](#features) · [Quick start](#quick-start) · [Tech stack](#tech-stack) · [Architecture](#architecture) · [Configuration](#configuration) · [Fare](#fare-calculation) · [URLs](#http-routes) · [Layout](#project-layout) · [License](#license)
 
 <br>
 
@@ -28,7 +31,7 @@
 
 <br>
 
-## Why Velora?
+## Why Quick-Go?
 
 | | |
 |:---|:---|
@@ -255,6 +258,6 @@ This project is licensed under the **MIT License** — see **[LICENSE](LICENSE)*
 
 <div align="center">
 
-**Velora** — *Ride booking, demo-ready.*
+**Quick-Go** — *Ride booking, demo-ready.*
 
 </div>
